@@ -1,14 +1,22 @@
-﻿using Newtonsoft.Json;
+﻿using Grpc.Core;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
+using WordServer.Protos;
 
-namespace WordleGameClient
+namespace WordServer.Services
 {
-    //temporary class to simulate a server, will be moved to gRPC service later
-    public class WordServer
+    public class WordServerService : DailyWord.DailyWordBase
     {
+        private readonly ILogger<WordServerService> _logger;
         private const string FileName = "wordle.json";
-        private static readonly string[] _words;
+        private static string[] _words;
 
-        static WordServer()
+        public WordServerService( ILogger<WordServerService> logger )
+        {
+            _logger = logger;
+        }
+
+        public static string GetWord()
         {
             try
             {
@@ -23,18 +31,11 @@ namespace WordleGameClient
             {
                 Console.WriteLine("Error parsing JSON!: " + e.Message);
             }
-        }
-        public string GetWord()
-        {
+
             int seed = (DateTime.Now.Year * 10000) + (DateTime.Now.Month * 100) + DateTime.Now.Day;
             Random random = new Random(seed);
             return _words[random.Next(0, _words.Length)];
         }
 
-        public bool ValidateWord( string word )
-        {
-            return _words.Contains(word);
-
-        }
     }
 }

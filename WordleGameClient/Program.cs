@@ -4,7 +4,12 @@
     {
         static void Main( string[] args )
         {
-            Console.WriteLine("Hello, World!");
+            WordServer wordServer = new WordServer();
+
+            WordleGameServer wordleGameServer = new WordleGameServer();
+
+            Console.WriteLine(WordleGameServer.Word);
+
         }
     }
 }

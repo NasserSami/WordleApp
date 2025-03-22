@@ -9,7 +9,7 @@ namespace WordServer.Services
     {
         private readonly ILogger<WordServerService> _logger;
         private const string FileName = "wordle.json";
-        private static string[]? _words;
+        private static string[] _words = [];
 
         static WordServerService()
         {
@@ -52,7 +52,7 @@ namespace WordServer.Services
 
         private bool WordValidation( string word )
         {
-            return _words!.Contains(word);
+            return _words.Contains(word);
         }
 
         private static void LoadWords()
@@ -60,31 +60,24 @@ namespace WordServer.Services
             try
             {
                 var json = File.ReadAllText(FileName);
-                _words = JsonConvert.DeserializeObject<string[]>(json);
+                _words = JsonConvert.DeserializeObject<string[]>(json) ?? [];
 
-                if (_words == null || _words.Length == 0)
-                {
+                if (_words.Length == 0)
                     Console.WriteLine("Warning: No words were loaded from the JSON file");
-                }
                 else
-                {
                     Console.WriteLine($"Successfully loaded {_words.Length} words");
-                }
             }
             catch (IOException e)
             {
                 Console.WriteLine("Error reading file: " + e.Message);
                 // Initialize to empty array to prevent null reference exceptions
-                _words = Array.Empty<string>();
+                _words = [];
             }
             catch (JsonException e)
             {
                 Console.WriteLine("Error parsing JSON: " + e.Message);
-                _words = Array.Empty<string>();
+                _words = [];
             }
         }
-
-
-
     }
 }

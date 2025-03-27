@@ -3,6 +3,7 @@ using WordServer.Protos;
 
 namespace WordleGameServer.Client
 {
+    // This class is used to connect to the WordServer gRPC service for the WordleServer
     public static class WordleGameServiceClient
     {
         private static DailyWord.DailyWordClient? _dailyWordServer = null;

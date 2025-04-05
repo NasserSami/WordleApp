@@ -8,7 +8,7 @@ namespace WordleGameServer.Models
     {
         private static readonly string StatsFileName = "game_stats.json";
         private static readonly Mutex StatsMutex = new Mutex(false, "WordleGameStatsMutex");
-        private static DateTime LastResetDay = DateTime.Today;
+        public DateTime LastResetDate { get; set; } = DateTime.Today;
 
         public int TotalPlayers { get; set; } = 0;
         public int TotalWinners { get; set; } = 0;
@@ -19,12 +19,7 @@ namespace WordleGameServer.Models
 
         public static GameStats GetCurrentStats()
         {
-            // Check if we need to reset statistics (day changed)
-            if (DateTime.Today > LastResetDay)
-            {
-                ResetStats();
-                LastResetDay = DateTime.Today;
-            }
+            GameStats stats;
 
             try
             {
@@ -33,10 +28,21 @@ namespace WordleGameServer.Models
                 if (File.Exists(StatsFileName))
                 {
                     string json = File.ReadAllText(StatsFileName);
-                    var stats = JsonSerializer.Deserialize<GameStats>(json);
-                    return stats ?? new GameStats();
+                    stats = JsonSerializer.Deserialize<GameStats>(json) ?? new GameStats();
                 }
-                return new GameStats();
+                else
+                {
+                    stats = new GameStats();
+                }
+
+                // Check if we need to reset statistics (day changed)
+                if (DateTime.Today > stats.LastResetDate)
+                {
+                    stats = new GameStats(); // Create a new stats object with today's date
+                    stats.SaveStats();       // Save immediately to persist the new reset date
+                }
+
+                return stats;
             }
             catch (Exception ex)
             {
@@ -55,8 +61,11 @@ namespace WordleGameServer.Models
             {
                 StatsMutex.WaitOne();
 
-                // Create new, empty stats
-                var newStats = new GameStats();
+                // Create new, empty stats with today's date
+                var newStats = new GameStats
+                {
+                    LastResetDate = DateTime.Today
+                };
 
                 // Save to file
                 string json = JsonSerializer.Serialize(newStats);
